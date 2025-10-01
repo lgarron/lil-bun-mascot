@@ -1,0 +1,13 @@
+{
+  "lockfileVersion": 1,
+  "workspaces": {
+    "": {
+      "dependencies": {
+        "scad": "^0.15.1",
+      },
+    },
+  },
+  "packages": {
+    "scad": ["scad@0.15.1", "", {}, "sha512-+L5goOFGkYKfku7LLcfm1CF+QDFU+T7PqRXSDM7wwzy7SiAbQqHKv91jXrLvaopl0NmnX9NtOe+aD+jn6TlvBg=="],
+  }
+}
