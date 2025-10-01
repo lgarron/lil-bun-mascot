@@ -1,21 +1,49 @@
-include <./node_modules/scad/vendor/BOSL2/std.scad>
-include <./node_modules/scad/xyz.scad>
-include <./node_modules/scad/filament_color.scad>
-include <./node_modules/scad/duplicate.scad>
+VARIANT = "default"; // ["default", "keychain"]
 
 $fn = 180;
 
 MAIN_RADIUS = 10;
 CORE_HEIGHT = 17.5;
 
-numP = 100;
+DEBUG = false;
+
+numP = DEBUG ? 50 : 100;
 deltaP = 1 / numP;
-numTheta = 180;
+numTheta = DEBUG ? 90 : 180;
 deltaTheta = 360 / numTheta;
 
 // This prevents any following `CONSTANT_CASE` variables from being settable in the customizer.
 // This prevents pathological interactions with persisted customizer values that are meant to be controlled exclusively by `VARIANT`.
 /* [Hidden] */
+
+VARIANT_DATA = [
+  [
+    "default",
+    [
+      [
+        ["INCLUDE_KEYCHAIN_LOOP", false],
+      ],
+    ],
+  ],
+  [
+    "keychain",
+    [
+      [
+        ["INCLUDE_KEYCHAIN_LOOP", true],
+      ],
+    ],
+  ],
+];
+
+include <./node_modules/scad/variants.scad>
+
+INCLUDE_KEYCHAIN_LOOP = get_parameter("INCLUDE_KEYCHAIN_LOOP");
+
+include <./node_modules/scad/vendor/BOSL2/std.scad>
+include <./node_modules/scad/xyz.scad>
+include <./node_modules/scad/filament_color.scad>
+include <./node_modules/scad/duplicate.scad>
+include <./node_modules/scad/compose.scad>
 
 assert(360 % numTheta == 0);
 
@@ -95,14 +123,23 @@ module eye_pupils() {
 }
 
 color(FILAMENT_COLOR__BAMBU__PETG_HF__CREAM)
-  difference() {
+  compose() {
     // TODO: condense identical points at the ends?
-    polyhedron(
-      points=[for (a = [0:(numP + 1) * (numTheta + 1)]) pointy_a(a)],
-      faces=[for (b = [0:( (numP) * numTheta) - 1]) faces(b)]
-    );
-    mouth();
-    main_eyes();
+    carvable() polyhedron(
+        points=[for (a = [0:(numP + 1) * (numTheta + 1)]) pointy_a(a)],
+        faces=[for (b = [0:( (numP) * numTheta) - 1]) faces(b)]
+      );
+
+    if (INCLUDE_KEYCHAIN_LOOP) {
+      translate(pointy(0.65, 90)) {
+        negative() sphere(3);
+        positive() rotate([0, 90, 0])
+            torus(or=5, ir=3);
+      }
+    }
+
+    negative() mouth();
+    negative() main_eyes();
   }
 
 color(FILAMENT_COLOR__BAMBU__PLA_BASIC__BLACK) difference() {
