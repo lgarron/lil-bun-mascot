@@ -137,6 +137,11 @@ module main_shape() {
   );
 }
 
+color(FILAMENT_COLOR__BAMBU__PLA_BASIC__BLACK) intersection() {
+    main_shape();
+    eyes();
+  }
+
 color(FILAMENT_COLOR__BAMBU__PETG_HF__CREAM)
   compose() {
     carvable() main_shape();
@@ -151,9 +156,4 @@ color(FILAMENT_COLOR__BAMBU__PETG_HF__CREAM)
 
     negative() eyes();
     negative() mouth();
-  }
-
-color(FILAMENT_COLOR__BAMBU__PLA_BASIC__BLACK) intersection() {
-    main_shape();
-    eyes();
   }
