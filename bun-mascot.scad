@@ -52,6 +52,6 @@ function faces(b) =
 
 // TODO: condense identical points at the ends?
 polyhedron(
-  points=[for (a = [0:(numP) * (numTheta + 1)]) pointy_a(a)],
-  faces=[for (b = [0:(numP - 1) * numTheta]) faces(b)]
+  points=[for (a = [0:(numP + 1) * (numTheta + 1)]) pointy_a(a)],
+  faces=[for (b = [0:( (numP) * numTheta) - 1]) faces(b)]
 );
