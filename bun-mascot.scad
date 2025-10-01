@@ -85,7 +85,7 @@ function faces(b) =
 module mouth() {
   translate(pointy(0.5, -90))
     difference() {
-      scale([2.25, 4, 2.5])
+      scale([1.8, 4, 2.5])
         sphere(1);
       cuboid(100, anchor=BOTTOM);
     }
