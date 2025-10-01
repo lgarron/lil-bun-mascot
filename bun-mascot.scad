@@ -39,19 +39,19 @@ function point(p, th) =
     pow(p, 1.15) * CORE_HEIGHT
   ) + _z_(smooth(p, [0.85, 0], [1, 0.1]));
 
-for (v = [0:deltaP:1 - deltaP]) {
+function a_to_p_th(a) = let (ij = a_to_ij(a), i = ij[0], j = ij[1]) [i * deltaP, j * deltaTheta];
+function a_to_ij(a) = [a % (numP + 1), floor(a / (numP + 1))];
+function ij_to_a(ij) = let (i = ij[0], j = ij[1]) i + (numP + 1) * j;
 
-  for (th = [0:deltaTheta:360 - deltaTheta]) {
-    polyhedron(
-      points=[
-        pointy(v, th),
-        pointy(v, th + deltaTheta),
-        pointy(v + deltaP, th + deltaTheta),
-        pointy(v + deltaP, th),
-      ],
-      faces=[
-        [0, 1, 2, 3],
-      ]
-    );
-  }
-}
+function pointy_a(a) = let (p_th = a_to_p_th(a), p = p_th[0], th = p_th[1]) pointy(p, th);
+
+function b_to_ij(b) = [b % (numP), floor(b / (numP))];
+
+function faces(b) =
+  let (ij = b_to_ij(b), i = ij[0], j = ij[1]) [ij_to_a([i, j]), ij_to_a([i + 1, j]), ij_to_a([i + 1, j + 1]), ij_to_a([i, j + 1])];
+
+// TODO: condense identical points at the ends?
+polyhedron(
+  points=[for (a = [0:(numP) * (numTheta + 1)]) pointy_a(a)],
+  faces=[for (b = [0:(numP - 1) * numTheta]) faces(b)]
+);
