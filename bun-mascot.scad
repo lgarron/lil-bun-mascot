@@ -38,10 +38,10 @@ function smooth_and_back(p, xy1, xy2) =
 
 function point(p, th) =
   pol(
-    MAIN_RADIUS * (semicircley(p) * smooth(p, [0.75, 1], [1, 0.75]) * smooth(p, [0.85, 1], [1, 0.75]) + smooth_and_back(p, [0.75, 0], [1, 0.05]) * smooth(th, [0, -2], [360, 1], scale_factor=20)),
+    MAIN_RADIUS * (semicircley(p) * smooth(p, [0.75, 1], [1, 0.75]) * smooth(p, [0.85, 1], [1, 0.75]) + smooth_and_back(p, [0.75, 0], [1, 0.05]) * smooth(th, [0, -3], [360, 1], scale_factor=20)),
     (th + smooth(p, [0.75, 0], [1, 45])),
     (pow(p, 1.25) + smooth(p, [0, 0.02], [0.05, 0]) - 0.02) * CORE_HEIGHT
-  ) + _z_(smooth(p, [0.85, 0], [1, 0.1]));
+  ) + _z_(smooth(p, [0.85, 0], [1, CORE_HEIGHT * 0.075]));
 
 function a_to_p_th(a) = let (ij = a_to_ij(a), i = ij[0], j = ij[1]) [i * deltaP, j * deltaTheta];
 function a_to_ij(a) = [a % (numP + 1), floor(a / (numP + 1))];
