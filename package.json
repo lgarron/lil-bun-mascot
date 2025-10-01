@@ -1,5 +1,5 @@
 {
-  "version": "0.1.5-dev",
+  "version": "0.1.5",
   "dependencies": {
     "scad": "^0.15.1"
   }
