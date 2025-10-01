@@ -1,4 +1,4 @@
-VARIANT = "default"; // ["default", "keychain"]
+VARIANT = "default"; // ["default", "keychain", "eyes-only", "cheeks-only", "mouth-only"]
 
 $fn = 180;
 
@@ -22,6 +22,9 @@ VARIANT_DATA = [
     [
       [
         ["INCLUDE_KEYCHAIN_LOOP", false],
+        ["EYES_ONLY", false],
+        ["CHEEKS_ONLY", false],
+        ["MOUTH_ONLY", false],
       ],
     ],
   ],
@@ -33,11 +36,39 @@ VARIANT_DATA = [
       ],
     ],
   ],
+  [
+    "eyes-only",
+    [
+      [
+        ["EYES_ONLY", true],
+      ],
+    ],
+  ],
+  [
+    "cheeks-only",
+    [
+      [
+        ["CHEEKS_ONLY", true],
+      ],
+    ],
+  ],
+  [
+    "mouth-only",
+    [
+      [
+        ["MOUTH_ONLY", true],
+      ],
+    ],
+  ],
 ];
 
 include <./node_modules/scad/variants.scad>
 
 INCLUDE_KEYCHAIN_LOOP = get_parameter("INCLUDE_KEYCHAIN_LOOP");
+EYES_ONLY = get_parameter("EYES_ONLY");
+CHEEKS_ONLY = get_parameter("CHEEKS_ONLY");
+MOUTH_ONLY = get_parameter("MOUTH_ONLY");
+ONLY = EYES_ONLY ? "eyes" : (CHEEKS_ONLY ? "cheeks" : (MOUTH_ONLY ? "mouth" : undef));
 
 include <./node_modules/scad/vendor/BOSL2/std.scad>
 include <./node_modules/scad/xyz.scad>
@@ -102,7 +133,7 @@ module mouth_negative() {
   }
 }
 
-MOUTH_COLOR_INSET = 0.4;
+MOUTH_COLOR_INSET = 1;
 
 module mouth_color() {
   color(FILAMENT_COLOR__BAMBU__PLA_BASIC__RED)
@@ -115,11 +146,13 @@ module mouth_color() {
     }
 }
 
-translate([MAIN_RADIUS, -10, 0])
-  down(MOUTH_COLOR_INSET)
-    rotate([90, 0, 0])
-      translate(-MOUTH_TRANSLATION)
-        mouth_color();
+if (ONLY == "mouth") {
+  translate([MAIN_RADIUS, -10, 0])
+    down(MOUTH_COLOR_INSET)
+      rotate([90, 0, 0])
+        translate(-MOUTH_TRANSLATION)
+          mouth_color();
+}
 
 if (DEBUG) {
   mouth_color();
@@ -161,26 +194,26 @@ module uneyeify(extra_angle = 0, p = 0.61, vertical_angle = -20, index = 0) {
               children();
 }
 
-module eye_outer(epsilon = 0, clearance = 0) {
+module eye_outer(epsilon = 0, clearance = 0, extra_inset = 0) {
   translate([0, -epsilon, 0])
     rotate([-90, 0, 0]) {
-      cylinder(r=2 - clearance, h=0.7 + epsilon, anchor=BOTTOM);
+      cylinder(r=2 - clearance, h=2.2 + extra_inset + epsilon, anchor=BOTTOM);
       scale([1.25, 0.75, 1])
-        cylinder(r=1 - clearance, h=1 + epsilon, anchor=BOTTOM);
+        cylinder(r=1 - clearance, h=3.5 + extra_inset + epsilon, anchor=BOTTOM);
     }
 }
 
-module eye_inner(epsilon = 0, clearance = 0) {
+module eye_inner(epsilon = 0, clearance = 0, extra_inset = 0) {
   translate([-0.25, -epsilon, 0.25])
     rotate([-90, 0, 0])
-      cylinder(r=1.25 - clearance, h=0.2 + epsilon, anchor=BOTTOM);
+      cylinder(r=1.25 - clearance, h=0.2 + extra_inset + epsilon, anchor=BOTTOM);
 }
 
-module cheek(epsilon = 0, clearance = 0) {
+module cheek(epsilon = 0, clearance = 0, extra_inset = 0) {
   translate([-0.25, -epsilon, 0.25])
     rotate([-90, 0, 0])
       scale([1.5, 1, 1])
-        cylinder(r=1.25 - clearance, h=0.5 + epsilon, anchor=BOTTOM);
+        cylinder(r=1.25 - clearance, h=2 + extra_inset + epsilon, anchor=BOTTOM);
 }
 
 module cheekify(double = true, index = 0) {
@@ -210,36 +243,40 @@ if (DEBUG) {
     }
 }
 
-duplicate_and_translate([5, 0, 0])
-  color(FILAMENT_COLOR__BAMBU__PLA_BASIC__WHITE)
-    right(MAIN_RADIUS)
-      rotate([90, 0, 0])
+if (ONLY == "eyes")
+  duplicate_and_translate([5, 0, 0])
+    color(FILAMENT_COLOR__BAMBU__PLA_BASIC__WHITE)
+      right(MAIN_RADIUS)
+        rotate([90, 0, 0])
+          difference() {
+            eye_outer(epsilon=0, clearance=0.1);
+            eye_inner(epsilon=1);
+          }
+
+if (ONLY == "eyes")
+  duplicate_and_translate([5, 0, 0])
+    color(FILAMENT_COLOR__BAMBU__PLA_BASIC__BLACK)
+      right(MAIN_RADIUS)
+        rotate([90, 0, 0])
+          eye_inner();
+
+if (ONLY == "cheeks")
+  color(FILAMENT_COLOR__ELEGOO__PLA_PLUS__PINK)
+    translate([MAIN_RADIUS, 10, 0])
+      uncheekify(index=0)
         difference() {
-          eye_outer(epsilon=0, clearance=0.1);
-          eye_inner(epsilon=1);
+          cheekify(double=false, index=0) cheek();
+          eyeify() eye_outer(epsilon=1);
         }
 
-duplicate_and_translate([5, 0, 0])
-  color(FILAMENT_COLOR__BAMBU__PLA_BASIC__BLACK)
-    right(MAIN_RADIUS)
-      rotate([90, 0, 0])
-        eye_inner();
-
-color(FILAMENT_COLOR__ELEGOO__PLA_PLUS__PINK)
-  translate([MAIN_RADIUS, 10, 0])
-    uncheekify(index=0)
-      difference() {
-        cheekify(double=false, index=0) cheek();
-        eyeify() eye_outer(epsilon=1);
-      }
-
-color(FILAMENT_COLOR__ELEGOO__PLA_PLUS__PINK)
-  translate([MAIN_RADIUS + 5, 10, 0])
-    uncheekify(index=1)
-      difference() {
-        cheekify(double=false, index=1) cheek();
-        eyeify() eye_outer(epsilon=1);
-      }
+if (ONLY == "cheeks")
+  color(FILAMENT_COLOR__ELEGOO__PLA_PLUS__PINK)
+    translate([MAIN_RADIUS + 5, 10, 0])
+      uncheekify(index=1)
+        difference() {
+          cheekify(double=false, index=1) cheek();
+          eyeify() eye_outer(epsilon=1);
+        }
 
 module main_shape() {
   // TODO: condense identical points at the ends?
@@ -249,23 +286,24 @@ module main_shape() {
   );
 }
 
-color(FILAMENT_COLOR__BAMBU__PETG_HF__CREAM)
-  compose() {
-    carvable() main_shape();
+if (is_undef(ONLY))
+  color(FILAMENT_COLOR__BAMBU__PETG_HF__CREAM)
+    compose() {
+      carvable() main_shape();
 
-    if (INCLUDE_KEYCHAIN_LOOP) {
-      translate(pointy(0.525, 90)) {
-        negative() rotate([0, 00, 0]) {
-            torus(or=5, ir=2);
-            scale([1.25, 1, 1])
+      if (INCLUDE_KEYCHAIN_LOOP) {
+        translate(pointy(0.525, 90)) {
+          negative() rotate([0, 00, 0]) {
               torus(or=5, ir=2);
-          }
+              scale([1.25, 1, 1])
+                torus(or=5, ir=2);
+            }
+        }
       }
-    }
 
-    negative()
-      eyeify() eye_outer(epsilon=1);
-    negative()
-      cheekify() cheek(epsilon=1);
-    negative() mouth_negative();
-  }
+      negative()
+        eyeify() eye_outer(extra_inset=0.3, epsilon=1);
+      negative()
+        cheekify() cheek(extra_inset=0.3, epsilon=1);
+      negative() mouth_negative();
+    }
