@@ -103,7 +103,7 @@ module scale_back(s) {
   }
 }
 
-INTEROCULAR_ANGLE = 35;
+INTEROCULAR_ANGLE = 50;
 
 module main_eyes() {
   duplicate_and_rotate(rotation=[0, 0, INTEROCULAR_ANGLE])
