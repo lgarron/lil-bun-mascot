@@ -82,13 +82,47 @@ function b_to_ij(b) = [b % (numP), floor(b / (numP))];
 function faces(b) =
   let (ij = b_to_ij(b), i = ij[0], j = ij[1]) [ij_to_a([i, j]), ij_to_a([i + 1, j]), ij_to_a([i + 1, j + 1]), ij_to_a([i, j + 1])];
 
-module mouth() {
-  translate(pointy(0.5, -90))
+MOUTH_TRANSLATION = pointy(0.5, -90);
+
+module mincore(sc = 1, shave_top = 0) {
+  translate(MOUTH_TRANSLATION)
     difference() {
-      scale([1.8, 4, 2.5])
-        sphere(1);
-      cuboid(100, anchor=BOTTOM);
+      scale(sc)
+        scale([1.8, 4, 2.5])
+          sphere(1);
+      down(shave_top)
+        cuboid(100, anchor=BOTTOM);
     }
+}
+module mouth_negative() {
+  minkowski() {
+    mincore()
+      rotate([90, 0, 0])
+        cyl(r=0.1, h=1);
+  }
+}
+
+MOUTH_COLOR_INSET = 0.4;
+
+module mouth_color() {
+  color(FILAMENT_COLOR__BAMBU__PLA_BASIC__RED)
+    difference() {
+      mincore();
+      mincore(0.8, shave_top=0.3);
+      back(MOUTH_COLOR_INSET)
+        translate(MOUTH_TRANSLATION)
+          cuboid(1000, anchor=BACK);
+    }
+}
+
+translate([MAIN_RADIUS, -10, 0])
+  down(MOUTH_COLOR_INSET)
+    rotate([90, 0, 0])
+      translate(-MOUTH_TRANSLATION)
+        mouth_color();
+
+if (DEBUG) {
+  mouth_color();
 }
 
 module scale_back(s) {
@@ -104,30 +138,108 @@ module scale_back(s) {
 }
 
 INTEROCULAR_ANGLE = 50;
+EXTRA_ANGLE_CHEEKS = 10;
 
-module main_eyes() {
-  duplicate_and_rotate(rotation=[0, 0, INTEROCULAR_ANGLE])
-    rotate([0, 0, -INTEROCULAR_ANGLE / 2])
-      translate(pointy(0.61, -90))
-        rotate([-25, 0, 0]) translate([0, 0.1, 0])
-            scale([2, 0.25, 2]) scale_back(10) sphere(1);
+module eyeify(extra_angle = 0, p = 0.61, vertical_angle = -20, double = true, index = 0) {
+  angle = INTEROCULAR_ANGLE + extra_angle;
+  rotate([0, 0, index == 1 ? angle : 0])
+    duplicate_and_rotate(rotation=[0, 0, angle], number_of_total_copies=double ? 2 : 1)
+      rotate([0, 0, -angle / 2])
+        translate(pointy(p, -90))
+          rotate([vertical_angle, 0, 0]) translate([0, 0.1, 0])
+              children();
 }
 
-module eye_pupils() {
-  duplicate_and_rotate(rotation=[0, 0, INTEROCULAR_ANGLE])
-    rotate([0, 0, -INTEROCULAR_ANGLE / 2])
-      translate(pointy(0.61, -90))
-        rotate([-25, 0, -5]) translate([0, 0.1, 0])
-            translate([-0.35, -0.25, 0.35])
-              scale([1, 0.25, 1]) scale_back(10) sphere(1);
+module uneyeify(extra_angle = 0, p = 0.61, vertical_angle = -20, index = 0) {
+  angle = INTEROCULAR_ANGLE + extra_angle;
+  rotate([90, 0, 0])
+    translate([0, -0.1, 0])
+      rotate([-vertical_angle, 0, 0])
+        translate(-pointy(p, -90))
+          rotate([0, 0, angle / 2])
+            rotate([0, 0, index == 1 ? -angle : 0])
+              children();
 }
 
-module eyes() {
-  difference() {
-    main_eyes();
-    eye_pupils();
-  }
+module eye_outer(epsilon = 0, clearance = 0) {
+  translate([0, -epsilon, 0])
+    rotate([-90, 0, 0]) {
+      cylinder(r=2 - clearance, h=0.7 + epsilon, anchor=BOTTOM);
+      scale([1.25, 0.75, 1])
+        cylinder(r=1 - clearance, h=1 + epsilon, anchor=BOTTOM);
+    }
 }
+
+module eye_inner(epsilon = 0, clearance = 0) {
+  translate([-0.25, -epsilon, 0.25])
+    rotate([-90, 0, 0])
+      cylinder(r=1.25 - clearance, h=0.2 + epsilon, anchor=BOTTOM);
+}
+
+module cheek(epsilon = 0, clearance = 0) {
+  translate([-0.25, -epsilon, 0.25])
+    rotate([-90, 0, 0])
+      scale([1.5, 1, 1])
+        cylinder(r=1.25 - clearance, h=0.5 + epsilon, anchor=BOTTOM);
+}
+
+module cheekify(double = true, index = 0) {
+  eyeify(10, 0.52, -5, double=double, index=index) children();
+}
+
+module uncheekify(index = 0) {
+  uneyeify(10, 0.52, -5, index=index) children();
+}
+
+if (DEBUG) {
+  color(FILAMENT_COLOR__BAMBU__PLA_BASIC__BLACK)
+    eyeify()
+      difference() {
+        eye_outer(epsilon=0);
+        eye_inner(epsilon=1);
+      }
+
+  color(FILAMENT_COLOR__BAMBU__PLA_BASIC__WHITE)
+    eyeify() eye_inner();
+
+  
+  color(FILAMENT_COLOR__ELEGOO__PLA_PLUS__PINK)
+    difference() {
+      cheekify() cheek();
+      eyeify() eye_outer(epsilon=1);
+    }
+}
+
+duplicate_and_translate([5, 0, 0])
+  color(FILAMENT_COLOR__BAMBU__PLA_BASIC__WHITE)
+    right(MAIN_RADIUS)
+      rotate([90, 0, 0])
+        difference() {
+          eye_outer(epsilon=0, clearance=0.1);
+          eye_inner(epsilon=1);
+        }
+
+duplicate_and_translate([5, 0, 0])
+  color(FILAMENT_COLOR__BAMBU__PLA_BASIC__BLACK)
+    right(MAIN_RADIUS)
+      rotate([90, 0, 0])
+        eye_inner();
+
+color(FILAMENT_COLOR__ELEGOO__PLA_PLUS__PINK)
+  translate([MAIN_RADIUS, 10, 0])
+    uncheekify(index=0)
+      difference() {
+        cheekify(double=false, index=0) cheek();
+        eyeify() eye_outer(epsilon=1);
+      }
+
+color(FILAMENT_COLOR__ELEGOO__PLA_PLUS__PINK)
+  translate([MAIN_RADIUS + 5, 10, 0])
+    uncheekify(index=1)
+      difference() {
+        cheekify(double=false, index=1) cheek();
+        eyeify() eye_outer(epsilon=1);
+      }
 
 module main_shape() {
   // TODO: condense identical points at the ends?
@@ -136,11 +248,6 @@ module main_shape() {
     faces=[for (b = [0:( (numP) * numTheta) - 1]) faces(b)]
   );
 }
-
-color(FILAMENT_COLOR__BAMBU__PLA_BASIC__BLACK) intersection() {
-    main_shape();
-    eyes();
-  }
 
 color(FILAMENT_COLOR__BAMBU__PETG_HF__CREAM)
   compose() {
@@ -156,6 +263,9 @@ color(FILAMENT_COLOR__BAMBU__PETG_HF__CREAM)
       }
     }
 
-    negative() eyes();
-    negative() mouth();
+    negative()
+      eyeify() eye_outer(epsilon=1);
+    negative()
+      cheekify() cheek(epsilon=1);
+    negative() mouth_negative();
   }
