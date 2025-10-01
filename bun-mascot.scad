@@ -62,21 +62,35 @@ module mouth() {
   }
 }
 
+module scale_back(s) {
+  scale([1, s, 1])
+    intersection() {
+      children();
+      cuboid(100, anchor=FRONT);
+    }
+  difference() {
+    children();
+    cuboid(100, anchor=FRONT);
+  }
+}
+
+INTEROCULAR_ANGLE = 35;
+
 module main_eyes() {
   duplicate_and_rotate(rotation=[0, 0, INTEROCULAR_ANGLE])
     rotate([0, 0, -INTEROCULAR_ANGLE / 2])
-      translate(pointy(0.63, -90))
+      translate(pointy(0.615, -90))
         rotate([-25, 0, 0])
-          scale([1.5, 0.25, 1.5]) sphere(1);
+          scale([2, 0.25, 2]) scale_back(10) sphere(1);
 }
 
 module eye_pupils() {
   duplicate_and_rotate(rotation=[0, 0, INTEROCULAR_ANGLE])
     rotate([0, 0, -INTEROCULAR_ANGLE / 2])
-      translate(pointy(0.63, -90))
-        rotate([-30, 0, -5])
+      translate(pointy(0.615, -90))
+        rotate([-25, 0, -5])
           translate([-0.35, -0.25, 0.35])
-            scale([0.75, 0.125, 0.75]) sphere(1);
+            scale([1, 0.125, 1]) scale_back(10) sphere(1);
 }
 
 color(FILAMENT_COLOR__BAMBU__PETG_HF__CREAM)
@@ -86,11 +100,9 @@ color(FILAMENT_COLOR__BAMBU__PETG_HF__CREAM)
       points=[for (a = [0:(numP + 1) * (numTheta + 1)]) pointy_a(a)],
       faces=[for (b = [0:( (numP) * numTheta) - 1]) faces(b)]
     );
-    translate(pointy(0.55, -90)) mouth();
+    translate(pointy(0.52, -90)) mouth();
     main_eyes();
   }
-
-INTEROCULAR_ANGLE = 35;
 
 color(FILAMENT_COLOR__BAMBU__PLA_BASIC__BLACK) difference() {
     main_eyes();
