@@ -1,4 +1,5 @@
 {
+  "version": "0.1.0",
   "dependencies": {
     "scad": "^0.15.1"
   }
