@@ -1,5 +1,9 @@
 include <./node_modules/scad/vendor/BOSL2/std.scad>
 include <./node_modules/scad/xyz.scad>
+include <./node_modules/scad/filament_color.scad>
+include <./node_modules/scad/duplicate.scad>
+
+$fn = 180;
 
 MAIN_RADIUS = 10;
 CORE_HEIGHT = 15;
@@ -50,8 +54,47 @@ function b_to_ij(b) = [b % (numP), floor(b / (numP))];
 function faces(b) =
   let (ij = b_to_ij(b), i = ij[0], j = ij[1]) [ij_to_a([i, j]), ij_to_a([i + 1, j]), ij_to_a([i + 1, j + 1]), ij_to_a([i, j + 1])];
 
-// TODO: condense identical points at the ends?
-polyhedron(
-  points=[for (a = [0:(numP + 1) * (numTheta + 1)]) pointy_a(a)],
-  faces=[for (b = [0:( (numP) * numTheta) - 1]) faces(b)]
-);
+module mouth() {
+  difference() {
+    scale([2, 4, 2])
+      sphere(1);
+    cuboid(100, anchor=BOTTOM);
+  }
+}
+
+module main_eyes() {
+  duplicate_and_rotate(rotation=[0, 0, INTEROCULAR_ANGLE])
+    rotate([0, 0, -INTEROCULAR_ANGLE / 2])
+      translate(pointy(0.63, -90))
+        rotate([-25, 0, 0])
+          scale([1.5, 0.25, 1.5]) sphere(1);
+}
+
+module eye_pupils() {
+  duplicate_and_rotate(rotation=[0, 0, INTEROCULAR_ANGLE])
+    rotate([0, 0, -INTEROCULAR_ANGLE / 2])
+      translate(pointy(0.63, -90))
+        rotate([-30, 0, -5])
+          translate([-0.35, -0.25, 0.35])
+            scale([0.75, 0.125, 0.75]) sphere(1);
+}
+
+color(FILAMENT_COLOR__BAMBU__PETG_HF__CREAM)
+  difference() {
+    // TODO: condense identical points at the ends?
+    polyhedron(
+      points=[for (a = [0:(numP + 1) * (numTheta + 1)]) pointy_a(a)],
+      faces=[for (b = [0:( (numP) * numTheta) - 1]) faces(b)]
+    );
+    translate(pointy(0.55, -90)) mouth();
+    main_eyes();
+  }
+
+INTEROCULAR_ANGLE = 35;
+
+color(FILAMENT_COLOR__BAMBU__PLA_BASIC__BLACK) difference() {
+    main_eyes();
+    eye_pupils();
+  }
+
+color(FILAMENT_COLOR__BAMBU__PLA_BASIC__WHITE) eye_pupils();
