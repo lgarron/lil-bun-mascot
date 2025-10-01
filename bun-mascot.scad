@@ -1,8 +1,8 @@
 include <./node_modules/scad/vendor/BOSL2/std.scad>
 include <./node_modules/scad/xyz.scad>
 
-MAIN_RADIUS = 20;
-CORE_HEIGHT = 30;
+MAIN_RADIUS = 10;
+CORE_HEIGHT = 15;
 
 numP = 100;
 deltaP = 1 / numP;
