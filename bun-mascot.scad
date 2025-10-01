@@ -147,10 +147,12 @@ color(FILAMENT_COLOR__BAMBU__PETG_HF__CREAM)
     carvable() main_shape();
 
     if (INCLUDE_KEYCHAIN_LOOP) {
-      translate(pointy(0.65, 90)) {
-        negative() sphere(3);
-        positive() rotate([0, 90, 0])
-            torus(or=5, ir=3);
+      translate(pointy(0.525, 90)) {
+        negative() rotate([0, 00, 0]) {
+            torus(or=5, ir=2);
+            scale([1.25, 1, 1])
+              torus(or=5, ir=2);
+          }
       }
     }
 
