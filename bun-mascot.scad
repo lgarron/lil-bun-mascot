@@ -109,26 +109,37 @@ module main_eyes() {
   duplicate_and_rotate(rotation=[0, 0, INTEROCULAR_ANGLE])
     rotate([0, 0, -INTEROCULAR_ANGLE / 2])
       translate(pointy(0.61, -90))
-        rotate([-25, 0, 0])
-          scale([2, 0.25, 2]) scale_back(10) sphere(1);
+        rotate([-25, 0, 0]) translate([0, 0.1, 0])
+            scale([2, 0.25, 2]) scale_back(10) sphere(1);
 }
 
 module eye_pupils() {
   duplicate_and_rotate(rotation=[0, 0, INTEROCULAR_ANGLE])
     rotate([0, 0, -INTEROCULAR_ANGLE / 2])
       translate(pointy(0.61, -90))
-        rotate([-25, 0, -5])
-          translate([-0.35, -0.25, 0.35])
-            scale([1, 0.125, 1]) scale_back(10) sphere(1);
+        rotate([-25, 0, -5]) translate([0, 0.1, 0])
+            translate([-0.35, -0.25, 0.35])
+              scale([1, 0.25, 1]) scale_back(10) sphere(1);
+}
+
+module eyes() {
+  difference() {
+    main_eyes();
+    eye_pupils();
+  }
+}
+
+module main_shape() {
+  // TODO: condense identical points at the ends?
+  polyhedron(
+    points=[for (a = [0:(numP + 1) * (numTheta + 1)]) pointy_a(a)],
+    faces=[for (b = [0:( (numP) * numTheta) - 1]) faces(b)]
+  );
 }
 
 color(FILAMENT_COLOR__BAMBU__PETG_HF__CREAM)
   compose() {
-    // TODO: condense identical points at the ends?
-    carvable() polyhedron(
-        points=[for (a = [0:(numP + 1) * (numTheta + 1)]) pointy_a(a)],
-        faces=[for (b = [0:( (numP) * numTheta) - 1]) faces(b)]
-      );
+    carvable() main_shape();
 
     if (INCLUDE_KEYCHAIN_LOOP) {
       translate(pointy(0.65, 90)) {
@@ -138,13 +149,11 @@ color(FILAMENT_COLOR__BAMBU__PETG_HF__CREAM)
       }
     }
 
+    negative() eyes();
     negative() mouth();
-    negative() main_eyes();
   }
 
-color(FILAMENT_COLOR__BAMBU__PLA_BASIC__BLACK) difference() {
-    main_eyes();
-    eye_pupils();
+color(FILAMENT_COLOR__BAMBU__PLA_BASIC__BLACK) intersection() {
+    main_shape();
+    eyes();
   }
-
-color(FILAMENT_COLOR__BAMBU__PLA_BASIC__WHITE) eye_pupils();
