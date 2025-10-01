@@ -6,7 +6,7 @@ include <./node_modules/scad/duplicate.scad>
 $fn = 180;
 
 MAIN_RADIUS = 10;
-CORE_HEIGHT = 15;
+CORE_HEIGHT = 17.5;
 
 numP = 100;
 deltaP = 1 / numP;
@@ -55,11 +55,12 @@ function faces(b) =
   let (ij = b_to_ij(b), i = ij[0], j = ij[1]) [ij_to_a([i, j]), ij_to_a([i + 1, j]), ij_to_a([i + 1, j + 1]), ij_to_a([i, j + 1])];
 
 module mouth() {
-  difference() {
-    scale([2, 4, 2])
-      sphere(1);
-    cuboid(100, anchor=BOTTOM);
-  }
+  translate(pointy(0.5, -90))
+    difference() {
+      scale([2.25, 4, 2.5])
+        sphere(1);
+      cuboid(100, anchor=BOTTOM);
+    }
 }
 
 module scale_back(s) {
@@ -79,7 +80,7 @@ INTEROCULAR_ANGLE = 35;
 module main_eyes() {
   duplicate_and_rotate(rotation=[0, 0, INTEROCULAR_ANGLE])
     rotate([0, 0, -INTEROCULAR_ANGLE / 2])
-      translate(pointy(0.615, -90))
+      translate(pointy(0.61, -90))
         rotate([-25, 0, 0])
           scale([2, 0.25, 2]) scale_back(10) sphere(1);
 }
@@ -87,7 +88,7 @@ module main_eyes() {
 module eye_pupils() {
   duplicate_and_rotate(rotation=[0, 0, INTEROCULAR_ANGLE])
     rotate([0, 0, -INTEROCULAR_ANGLE / 2])
-      translate(pointy(0.615, -90))
+      translate(pointy(0.61, -90))
         rotate([-25, 0, -5])
           translate([-0.35, -0.25, 0.35])
             scale([1, 0.125, 1]) scale_back(10) sphere(1);
@@ -100,7 +101,7 @@ color(FILAMENT_COLOR__BAMBU__PETG_HF__CREAM)
       points=[for (a = [0:(numP + 1) * (numTheta + 1)]) pointy_a(a)],
       faces=[for (b = [0:( (numP) * numTheta) - 1]) faces(b)]
     );
-    translate(pointy(0.52, -90)) mouth();
+    mouth();
     main_eyes();
   }
 
