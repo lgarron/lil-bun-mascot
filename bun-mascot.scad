@@ -135,28 +135,46 @@ module mouth_negative() {
 }
 
 MOUTH_COLOR_INSET = 1;
+MOUTH_OUTLINE_DEPTH = 0.1;
 
-module mouth_color() {
-  color(FILAMENT_COLOR__BAMBU__PLA_BASIC__RED)
-    difference() {
-      mincore();
-      mincore(0.8, shave_top=0.3);
-      back(MOUTH_COLOR_INSET)
-        translate(MOUTH_TRANSLATION)
-          cuboid(1000, anchor=BACK);
-    }
+module mouth_main(outline = false) {
+  difference() {
+    mincore();
+    mincore(0.8, shave_top=0.3);
+    back(MOUTH_COLOR_INSET)
+      translate(MOUTH_TRANSLATION) {
+        cuboid(1000, anchor=BACK);
+        if (outline) {
+          back(MOUTH_OUTLINE_DEPTH)
+            cuboid(1000, anchor=FRONT);
+        } else {
+          back(MOUTH_OUTLINE_DEPTH)
+            cuboid(1000, anchor=BACK);
+        }
+      }
+  }
 }
+
+module mouth_outline_mask() {
+  translate(MOUTH_TRANSLATION)
+    back(MOUTH_OUTLINE_DEPTH) cuboid(1000, anchor=BACK);
+}
+
+// #mouth_outline_mask();
 
 if (ONLY == "mouth") {
   translate([MAIN_RADIUS, -10, 0])
     down(MOUTH_COLOR_INSET)
       rotate([90, 0, 0])
-        translate(-MOUTH_TRANSLATION)
-          mouth_color();
+        translate(-MOUTH_TRANSLATION) {
+          color(FILAMENT_COLOR__BAMBU__PLA_BASIC__BLACK) mouth_main(outline=true);
+          color(FILAMENT_COLOR__BAMBU__PLA_BASIC__RED) mouth_main(outline=false);
+        }
 }
 
 if (DEBUG) {
-  mouth_color();
+  color(FILAMENT_COLOR__BAMBU__PLA_BASIC__BLACK) mouth_main(outline=true);
+  color(FILAMENT_COLOR__BAMBU__PLA_BASIC__RED) mouth_main(outline=false);
 }
 
 module scale_back(s) {
