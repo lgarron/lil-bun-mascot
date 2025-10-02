@@ -163,13 +163,21 @@ module mouth_outline_mask() {
 // #mouth_outline_mask();
 
 if (ONLY == "mouth") {
-  translate([MAIN_RADIUS, -10, 0])
-    down(MOUTH_COLOR_INSET)
-      rotate([90, 0, 0])
-        translate(-MOUTH_TRANSLATION) {
-          color(FILAMENT_COLOR__BAMBU__PLA_BASIC__BLACK) mouth_main(outline=true);
-          color(FILAMENT_COLOR__BAMBU__PLA_BASIC__RED) mouth_main(outline=false);
-        }
+  color(FILAMENT_COLOR__BAMBU__PLA_BASIC__BLACK) translate([MAIN_RADIUS, -10, 0])
+      down(MOUTH_COLOR_INSET)
+        rotate([90, 0, 0])
+          translate(-MOUTH_TRANSLATION) {
+            mouth_main(outline=true);
+          }
+}
+
+if (ONLY == "mouth") {
+  color(FILAMENT_COLOR__BAMBU__PLA_BASIC__RED) translate([MAIN_RADIUS, -10, 0])
+      down(MOUTH_COLOR_INSET)
+        rotate([90, 0, 0])
+          translate(-MOUTH_TRANSLATION) {
+            mouth_main(outline=false);
+          }
 }
 
 if (DEBUG) {
