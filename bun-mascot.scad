@@ -6,10 +6,11 @@ MAIN_RADIUS = 10;
 CORE_HEIGHT = 17.5;
 
 DEBUG = false;
+REDUCE_MESH_DENSITY_FOR_DEBUG = true;
 
-numP = DEBUG ? 50 : 100;
+numP = (DEBUG && REDUCE_MESH_DENSITY_FOR_DEBUG) ? 50 : 100;
 deltaP = 1 / numP;
-numTheta = DEBUG ? 90 : 180;
+numTheta = (DEBUG && REDUCE_MESH_DENSITY_FOR_DEBUG) ? 90 : 180;
 deltaTheta = 360 / numTheta;
 
 // This prevents any following `CONSTANT_CASE` variables from being settable in the customizer.
