@@ -233,7 +233,7 @@ module eye_outer(epsilon = 0, clearance = 0, extra_inset = 0) {
 module eye_inner(epsilon = 0, clearance = 0, extra_inset = 0) {
   translate([-0.45, -epsilon, 0.45])
     rotate([-90, 0, 0])
-      cylinder(r=1 - clearance, h=0.2 + extra_inset + epsilon, anchor=BOTTOM);
+      cylinder(r=0.85 - clearance, h=0.2 + extra_inset + epsilon, anchor=BOTTOM);
 }
 
 module cheek(epsilon = 0, clearance = 0, extra_inset = 0) {
